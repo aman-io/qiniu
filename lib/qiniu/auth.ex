@@ -93,6 +93,14 @@ defmodule Qiniu.Auth do
 
   @doc false
   def hex_digest(key, data) when is_binary(key) and is_binary(data) do
-    :crypto.hmac(:sha, key, data) |> Base.url_encode64
+    :sha
+    |> hmac_fun(key, data)
+    |> Base.url_encode64
+  end
+
+  if Code.ensure_loaded?(:crypto) and function_exported?(:crypto, :mac, 4) do
+    defp hmac_fun(digest, key, data), do: :crypto.mac(:hmac, digest, key, data)
+  else
+    defp hmac_fun(digest, key, data), do: :crypto.hmac(digest, key, data)
   end
 end
